@@ -44,4 +44,4 @@ main = do
   let b = var 2.0 "b"
   let c = setLabel "c" (a + b)
   
-  print d
+  print c
