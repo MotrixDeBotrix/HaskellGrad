@@ -1,1 +1,1 @@
-HaskellNet
+HaskellGrad
