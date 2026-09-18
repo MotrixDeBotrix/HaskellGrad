@@ -1,5 +1,5 @@
 -- Datatype for operations on expression graph nodes
-data Op = Add | Mul 
+data Op = Add | Mul | Tanh
   deriving (Eq, Show)
 
 -- Datatype for expression graph nodes
@@ -7,6 +7,10 @@ data Value
   = Leaf { val :: Float, grad :: Float, label :: Maybe String }
   | Node { val :: Float, grad :: Float, children :: [Value], op :: Op, label :: Maybe String }
   deriving (Eq, Show)
+
+tanh' :: Value -> Value
+tanh' v = node (tanh (val v)) [v] Tanh
+
 
 -- Constructors
 -- Default constructor for leaves/variables
@@ -44,4 +48,4 @@ main = do
   let b = var 2.0 "b"
   let c = setLabel "c" (a + b)
   
-  print c
+  print $ tanh' c
