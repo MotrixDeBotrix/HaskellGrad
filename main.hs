@@ -20,7 +20,7 @@ epoch model inputs targets learn =
       updated     = updateMLP learn grads model
   in (updated, lossVal)
 
--- Actual training loop
+-- Training loop
 train :: Int -> Int -> MLP -> [[Value]] -> [Float] -> Float -> IO MLP
 train currentEpoch maxEpochs model inputs targets learningRate
   | currentEpoch > maxEpochs = return model
