@@ -1,1 +1,1 @@
-Basic sequential micrograd port in Haskell
+Basic sequential micrograd implementation in Haskell
