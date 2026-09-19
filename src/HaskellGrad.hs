@@ -1,4 +1,4 @@
-module Autograd
+module HaskellGrad
   ( Value(..)
   , Op(..)
   , GradMap
@@ -18,6 +18,7 @@ module Autograd
 import qualified Data.Map.Strict as Map
 import Data.Map.Strict (Map)
 import Data.List (foldl')
+
 
 type GradMap = Map Value Float
 
@@ -41,6 +42,7 @@ constant x = Leaf { val = x, label = Nothing }
 
 node :: Float -> [Value] -> Op -> Value
 node v ch o = Node { val = v, children = ch, op = o, label = Nothing }
+
 
 getChildren :: Value -> [Value]
 getChildren (Node { children = ch }) = ch
@@ -99,12 +101,14 @@ propagateValue v grads =
 
     _ -> grads
 
+
 topoSort :: Value -> [Value]
 topoSort root = go [] root
   where
     go visited v 
       | v `elem` visited = visited
       | otherwise        = v : foldl' go visited (getChildren v)
+
 
 backward :: Value -> GradMap
 backward root =
