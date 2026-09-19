@@ -1,5 +1,6 @@
 module HaskellNet where
 
+import Data.List (foldl')
 import HaskellGrad
 
 data Neuron = Neuron { weights :: [Value], bias :: Value }
@@ -43,20 +44,37 @@ callMLP :: MLP -> [Value] -> [Value]
 callMLP (MLP layers) inputs = foldl' (\input layer -> callLayer layer input) inputs layers
 
 
+meanSquaredLoss :: [Value] -> [Float] -> Value
+meanSquaredLoss predictions targets =
+  let squaredErrors = [ (predVal - constant target) * (predVal - constant target)
+                      | (predVal, target) <- zip predictions targets ]
+      totalError = sum squaredErrors
+      numSamples = fromIntegral $ length predictions
+  in totalError / numSamples
 
 main :: IO ()
 main = do
-  -- Create a neuron with 2 inputs (initial weights = [2.0, -3.0], bias = 1.0)
-  let neuron = newNeuron [2.0, -3.0] 1.0 "n1"
-  
-  -- Define inputs x1 = 1.0, x2 = 2.0
-  let x1 = var 1.0 "x1"
-  let x2 = var 2.0 "x2"
-  
-  -- Forward pass: output = tanh((2.0 * 1.0) + (-3.0 * 2.0) + 1.0) = tanh(-3.0)
-  let out = callNeuron neuron [x1, x2]
-  
-  -- Backward pass
-  let grads = backward out
-  
-  putStrLn $ "Neuron output: " ++ show (val out)
+  -- let dataSetInputs = [ [2.0,  3.0, -1.0],
+  --                       [3.0, -1.0,  0.5],
+  --                       [0.5,  1.0,  1.0],
+  --                       [1.0,  1.0, -1.0] ]
+
+  -- let dataSetTargets = [1.0, -1.0, -1.0, 1.0]
+
+  let x = [constant 1.0, constant 2.0]
+
+  let layer1 = Layer [ newNeuron [0.5, -0.5] 0.1 "h1",
+                       newNeuron [0.2,  0.8] 0.0 "h2" ]
+  let layer2 = Layer [ newNeuron [0.4, -0.1] 0.2 "out"]
+  let model = MLP [layer1, layer2]
+
+  let preds = callMLP model x
+  let loss  = meanSquaredLoss preds [1.0]
+
+  let grads = backprop loss
+
+  putStrLn $ "Prediction: " ++ show (map val preds)
+  putStrLn $ "Loss:       " ++ show (val loss)
+  case neurons layer1 of
+    (n1:_) -> putStrLn $ "Grad (h1_b): " ++ show (getGrad (bias n1) grads)
+    []     -> putStrLn "No neurons in layer1"
