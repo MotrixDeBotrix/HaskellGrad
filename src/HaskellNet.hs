@@ -5,6 +5,8 @@ import HaskellGrad
 data Neuron = Neuron { weights :: [Value], bias :: Value }
   deriving (Show)
 
+getNeuronParams :: Neuron -> [Value]
+getNeuronParams n = weights n ++ [bias n]
 
 newNeuron :: [Float] -> Float -> String -> Neuron
 newNeuron weights' bias' tag = Neuron
@@ -14,6 +16,32 @@ newNeuron weights' bias' tag = Neuron
 callNeuron :: Neuron -> [Value] -> Value
 callNeuron neuron inputs = tanh' $ weightedSum + bias neuron
   where weightedSum = sum [ w * x | (w, x) <- zip (weights neuron) inputs ]
+
+
+newtype Layer = Layer { neurons :: [Neuron] }
+  deriving (Show)
+
+getLayerParams :: Layer -> [Value]
+getLayerParams (Layer neurons) = concatMap getNeuronParams neurons
+
+newLayer :: [[Float]] -> [Float] -> String -> Layer
+newLayer weightsMatrix biases tag = Layer
+  [ newNeuron w b (tag ++ "_n" ++ show i)
+  | (i, (w, b)) <- zip [1..] (zip weightsMatrix biases) ]
+
+callLayer :: Layer -> [Value] -> [Value]
+callLayer (Layer neurons) inputs = [ callNeuron n inputs | n <- neurons ]
+
+
+newtype MLP = MLP { layers :: [Layer] }
+  deriving (Show)
+
+getMLPParams :: MLP -> [Value]
+getMLPParams (MLP layers) = concatMap getLayerParams layers
+
+callMLP :: MLP -> [Value] -> [Value]
+callMLP (MLP layers) inputs = foldl' (\input layer -> callLayer layer input) inputs layers
+
 
 
 main :: IO ()
@@ -32,6 +60,3 @@ main = do
   let grads = backward out
   
   putStrLn $ "Neuron output: " ++ show (val out)
-  putStrLn "Gradients for neuron parameters:"
-  mapM_ (\w -> putStrLn $ "  d/d" ++ show (label w) ++ " = " ++ show (getGrad w grads)) (weights neuron)
-  putStrLn $ "  d/d" ++ show (label (bias neuron)) ++ " = " ++ show (getGrad (bias neuron) grads)
