@@ -12,7 +12,7 @@ module HaskellGrad
   , getGrad
   , topoSort
   , propagateValue
-  , backward
+  , backprop
   ) where
 
 import qualified Data.Map.Strict as Map
@@ -65,7 +65,7 @@ instance Num Value where
   (+) a b = node (val a + val b) [a, b] Add
   (*) a b = node (val a * val b) [a, b] Mul
   fromInteger n = constant (fromInteger n)
-  negate a = a * (-1)
+  negate a = a * constant (-1.0)
   abs _    = error "abs not implemented"
   signum _ = error "signum not implemented"
 
@@ -110,8 +110,8 @@ topoSort root = go [] root
       | otherwise        = v : foldl' go visited (getChildren v)
 
 
-backward :: Value -> GradMap
-backward root =
+backprop :: Value -> GradMap
+backprop root =
   let topo = topoSort root
       initialGrads = Map.singleton root 1.0
   in foldl' (\grads v -> propagateValue v grads) initialGrads topo
