@@ -1,26 +1,22 @@
 module HaskellNet
-  ( Neuron(..)
-  , Layer(..)
-  , MLP(..)
-
-  , newNeuron
-  , newLayer
-
-  , callNeuron
-  , callLayer
-  , callMLP
-
-  , getNeuronParams
-  , getLayerParams
-  , getMLPParams
-
-  , meanSquaredLoss
-
-  , updateVal
-  , updateNeuron
-  , updateLayer
-  , updateMLP
-  ) where
+  ( Neuron (..),
+    Layer (..),
+    MLP (..),
+    newNeuron,
+    newLayer,
+    callNeuron,
+    callLayer,
+    callMLP,
+    getNeuronParams,
+    getLayerParams,
+    getMLPParams,
+    meanSquaredLoss,
+    updateVal,
+    updateNeuron,
+    updateLayer,
+    updateMLP,
+  )
+where
 
 import Data.List (foldl')
 import HaskellGrad
@@ -29,13 +25,13 @@ import HaskellGrad
 -- Data types
 --------------------------------------------------------------------------------
 
-data Neuron = Neuron { weights :: [Value], bias :: Value }
+data Neuron = Neuron {weights :: [Value], bias :: Value}
   deriving (Show)
 
-newtype Layer = Layer { neurons :: [Neuron] }
+newtype Layer = Layer {neurons :: [Neuron]}
   deriving (Show)
 
-newtype MLP = MLP { layers :: [Layer] }
+newtype MLP = MLP {layers :: [Layer]}
   deriving (Show)
 
 --------------------------------------------------------------------------------
@@ -43,16 +39,18 @@ newtype MLP = MLP { layers :: [Layer] }
 --------------------------------------------------------------------------------
 
 newNeuron :: [Float] -> Float -> String -> Neuron
-newNeuron weights' bias' tag = Neuron
-  { weights = [ var w (tag ++ "_w" ++ show i) | (i, w) <- zip [1..] weights' ]
-  , bias    = var bias' (tag ++ "_b") 
-  }
+newNeuron weights' bias' tag =
+  Neuron
+    { weights = [var w (tag ++ "_w" ++ show i) | (i, w) <- zip [1 ..] weights'],
+      bias = var bias' (tag ++ "_b")
+    }
 
 newLayer :: [[Float]] -> [Float] -> String -> Layer
-newLayer weightsMatrix biases tag = Layer
-  [ newNeuron w b (tag ++ "_n" ++ show i)
-  | (i, (w, b)) <- zip [1..] (zip weightsMatrix biases) 
-  ]
+newLayer weightsMatrix biases tag =
+  Layer
+    [ newNeuron w b (tag ++ "_n" ++ show i)
+    | (i, (w, b)) <- zip [1 ..] (zip weightsMatrix biases)
+    ]
 
 --------------------------------------------------------------------------------
 -- Calling (forward pass)
@@ -60,10 +58,11 @@ newLayer weightsMatrix biases tag = Layer
 
 callNeuron :: Neuron -> [Value] -> Value
 callNeuron neuron inputs = tanh' $ weightedSum + bias neuron
-  where weightedSum = sum [ w * x | (w, x) <- zip (weights neuron) inputs ]
+  where
+    weightedSum = sum [w * x | (w, x) <- zip (weights neuron) inputs]
 
 callLayer :: Layer -> [Value] -> [Value]
-callLayer (Layer neurons) inputs = [ callNeuron n inputs | n <- neurons ]
+callLayer (Layer neurons) inputs = [callNeuron n inputs | n <- neurons]
 
 callMLP :: MLP -> [Value] -> [Value]
 callMLP (MLP layers) inputs = foldl' (\input layer -> callLayer layer input) inputs layers
@@ -87,25 +86,27 @@ getMLPParams (MLP layers) = concatMap getLayerParams layers
 
 meanSquaredLoss :: [Value] -> [Float] -> Value
 meanSquaredLoss predictions targets =
-  let squaredErrors = [ (predVal - constant target) * (predVal - constant target)
-                      | (predVal, target) <- zip predictions targets 
-                      ]
+  let squaredErrors =
+        [ (predVal - constant target) * (predVal - constant target)
+        | (predVal, target) <- zip predictions targets
+        ]
       totalError = sum squaredErrors
       numSamples = fromIntegral $ length predictions
-  in totalError / numSamples
+   in totalError / numSamples
 
 --------------------------------------------------------------------------------
 -- Gradient descent
 --------------------------------------------------------------------------------
 
 updateVal :: Float -> GradMap -> Value -> Value
-updateVal learn grads v = v { val = val v - learn * getGrad v grads }
+updateVal learn grads v = v {val = val v - learn * getGrad v grads}
 
 updateNeuron :: Float -> GradMap -> Neuron -> Neuron
-updateNeuron learn grads n = n
-  { weights = map (updateVal learn grads) (weights n)
-  , bias    = updateVal learn grads (bias n)
-  }
+updateNeuron learn grads n =
+  n
+    { weights = map (updateVal learn grads) (weights n),
+      bias = updateVal learn grads (bias n)
+    }
 
 updateLayer :: Float -> GradMap -> Layer -> Layer
 updateLayer learn grads (Layer neurons) = Layer [updateNeuron learn grads n | n <- neurons]
