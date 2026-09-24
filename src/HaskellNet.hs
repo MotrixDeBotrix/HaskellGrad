@@ -81,7 +81,7 @@ getMLPParams :: MLP -> [Value]
 getMLPParams (MLP layers) = concatMap getLayerParams layers
 
 --------------------------------------------------------------------------------
--- Loss
+-- | _
 --------------------------------------------------------------------------------
 
 meanSquaredLoss :: [Value] -> [Float] -> Value
