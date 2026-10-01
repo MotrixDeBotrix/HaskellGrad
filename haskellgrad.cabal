@@ -5,10 +5,11 @@ build-type: Simple
 
 executable haskellgrad
   main-is: main.hs
-  hs-source-dirs: ., src
+  hs-source-dirs: ., src/Grad, scr/Net, DatasetLoading
   other-modules:
       HaskellGrad
     , HaskellNet
+    , Model
   build-depends:
       base >= 4.20 && < 5
     , containers
