@@ -1,4 +1,4 @@
-module HaskellGrad
+module Grad.HaskellGrad
   ( Value(..)
   , Op(..)
   , GradMap

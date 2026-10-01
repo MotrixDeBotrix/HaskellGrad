@@ -1,4 +1,4 @@
-module HaskellNet
+module Net.HaskellNet
   ( Neuron (..),
     Layer (..),
     MLP (..),
@@ -19,7 +19,7 @@ module HaskellNet
 where
 
 import Data.List (foldl')
-import HaskellGrad
+import Grad.HaskellGrad
 
 --------------------------------------------------------------------------------
 -- Data types
