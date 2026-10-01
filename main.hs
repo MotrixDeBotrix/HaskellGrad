@@ -22,7 +22,7 @@ main = do
 
 
   -- Specify model
-  let initialWeights = repeat 0.1
+  let initialWeights = iterate (\x -> sin (x + 1.0)) 0.1
   let myHaskellNet = newHaskellNet 3 [4, 4] 1 initialWeights
 
 

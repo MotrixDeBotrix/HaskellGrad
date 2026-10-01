@@ -5,7 +5,7 @@ build-type: Simple
 
 executable haskellgrad
   main-is: main.hs
-  hs-source-dirs: . src
+  hs-source-dirs: ., src
   other-modules:
       Grad.HaskellGrad
     , Net.HaskellNet
